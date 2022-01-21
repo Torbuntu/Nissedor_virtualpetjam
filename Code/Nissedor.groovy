@@ -10,7 +10,6 @@ class Nissedor extends leikr.Engine {
 	def hud = "hud.png"
 
 	def happiness = "happiness.png"
-	def boredom = "boredom.png"
 
 	def action, debug = false
 
@@ -23,6 +22,7 @@ class Nissedor extends leikr.Engine {
 	def hideTimer = 10
 
 	Nisse nisse
+
 
 	void create() {
 		nisse = new Nisse()
@@ -37,17 +37,30 @@ class Nissedor extends leikr.Engine {
 			clickPos.y = (Integer) mouseY()
 			click = 10
 
-			if (mouseX() > nisse.x - 5 && mouseX() < nisse.x + 25) {
-				if (mouseY() > nisse.y) {
-					if (nisse.fore) {
-						hideCount = 10
-						nisse.fore = false
-						nisse.x = randInt(15, 205)
-					} else {
-						nisse.happiness += 20
-						if (nisse.happiness > 100) nisse.happiness = 100
-						nisse.fore = true
-					}
+			// Feed
+			if(checkIn([11, 26, 36, 50])){
+				nisse.tryFeed()
+			}
+			if(checkIn([28, 42, 36, 50])){
+				nisse.tryPlay()
+			}
+			if(checkIn([46, 60, 36, 50])){
+				nisse.inquire()
+			}
+			if(checkIn([62, 78, 36, 50])){
+				nisse.trySleep()
+			}
+
+			// Click Nisse
+			if (checkIn([nisse.x+8, nisse.x+22, nisse.y+10, nisse.y+32])) {
+				if (nisse.fore) {
+					hideCount = 10
+					nisse.fore = false
+					nisse.x = randInt(15, 205)
+				} else {
+					nisse.happy += 20
+					if (nisse.happy > 100) nisse.happy = 100
+					nisse.fore = true
 				}
 			}
 		}
@@ -103,13 +116,20 @@ class Nissedor extends leikr.Engine {
 	void renderDebug() {
 		drawString(1, "map offset: $mapOffset", 0, 0)
 		drawString(1, "Fore: ${nisse.fore}", 0, 10)
+		drawCircle(10, mouseX(), mouseY(), 3)
 	}
 
 	void renderHud() {
 		// render UI
 		drawTexture(hud, 0, 0)
+		fillRect(15, 4, 8, (nisse.energy/100) * 90, 11)
 		// BEGIN Cursor
 		drawTexture(cursorUp, mouseX(), mouseY(), 10, 12)
+
+		if(nisse.answer > 0){
+			nisse.answer--
+			drawString(1, nisse.mood, nisse.x, nisse.y)
+		}
 
 		// Click action
 		if (click > 0) {
@@ -117,16 +137,22 @@ class Nissedor extends leikr.Engine {
 			drawCircle(15, clickPos.x, clickPos.y, click + 5)
 		}
 
-		drawTexture(happiness, 4, 8, (82 / nisse.happiness) * 100, 11)
-		drawTexture(boredom, 236 - nisse.boredom, 8, nisse.boredom, 11)
-
 		if (mouseY() < 20) {
 			if (mouseX() < 90) {
-				drawString(1, "Happiness", mouseX() - 6, mouseY() - 6)
+				drawString(1, "Energy", mouseX() - 6, mouseY() - 6)
 			}
-			if (mouseX() > 150) {
-				drawString(1, "Boredom", mouseX() - 20, mouseY() - 6)
-			}
+		}
+		if(checkIn([11, 26, 36, 50])){
+			drawString(1, "Feed", mouseX()-5, mouseY()-8)
+		}
+		if(checkIn([28, 42, 36, 50])){
+			drawString(1, "Play", mouseX()-5, mouseY()-8)
+		}
+		if(checkIn([46, 60, 36, 50])){
+			drawString(1, "Inquire", mouseX()-5, mouseY()-8)
+		}
+		if(checkIn([62, 78, 36, 50])){
+			drawString(1, "Sleep", mouseX()-5, mouseY()-8)
 		}
 	}
 
@@ -137,7 +163,10 @@ class Nissedor extends leikr.Engine {
 			hideTimer = 10
 			hideCount--
 		}
+	}
 
+	boolean checkIn(box){
+		mouseX() > box[0] && mouseX() < box[1] && mouseY() > box[2] && mouseY() < box[3]
 	}
 }
 

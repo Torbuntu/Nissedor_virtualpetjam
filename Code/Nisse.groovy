@@ -12,10 +12,12 @@ class Nisse {
 	def dir = 0
 	def recharge = 0
 
+	def energy = 100
 	def happy = 100
-	def tired = 1
 	def bored = 0
 	def hungry = 0
+	def mood = "Nisse's mood here"
+	def answer = 0
 
 	def animIndex = 0
 	def animSpeed = 10
@@ -44,9 +46,11 @@ class Nisse {
 			return
 		}
 
-		if (recharge <= 0) {
+		if (recharge <= 0 && energy > 0) {
 			recharge = 200
 			move = system.randInt(5, 45)
+			energy -= (int)(move/3)
+			if(energy < 0) energy = 0
 		} else {
 			recharge--
 		}
@@ -64,8 +68,6 @@ class Nisse {
 			}
 
 		}
-
-		if (boredom < 82) boredom++
 	}
 
 	def updateAnim() {
@@ -81,5 +83,43 @@ class Nisse {
 		if (move > 0) graphics.sprite(dir == 0 ? walkRight[animIndex] : walkLeft[animIndex], x + offset, y, 2)
 		//Still
 		else graphics.sprite(defaultSprite, x + offset, y, 2)
+	}
+
+	// If Nisse eats, spend 10 energy and reduce 15 hunger points.
+	def tryFeed(){
+		if(hungry > 50 && energy > 25){
+			energy -= 10
+			hungry -= 15
+		}
+	}
+
+	// Playing makes Nisse hungry by 10 points and costs 25 energy.
+	def tryPlay(){
+		if(hungry < 20 && energy > 40){
+			energy -= 25
+			hungry += 10
+		}
+	}
+
+	// Check on how Nisse is doing
+	def inquire(){
+		answer = 100
+		if(energy < 10) {
+			mood = "I'm quite tired..."
+			return
+		}
+		if(hungry > 50){
+			mood = "I could eat..."
+			return
+		}
+		if(bored > 50){
+			mood = "I'm kind of bored here..."
+			return
+		}
+		mood = ":)"
+	}
+
+	def trySleep(){
+
 	}
 }
