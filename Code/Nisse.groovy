@@ -7,10 +7,12 @@ class Nisse {
 	// Default standing position.
 	def defaultSprite = 7
 	def fore = true
+	def sleeping = false
 
 	def move
 	def dir = 0
 	def recharge = 0
+	def sleepTime = 0
 
 	def energy = 100
 	def happy = 100
@@ -40,6 +42,17 @@ class Nisse {
 		if (fore) this.offset = offset / 2
 		else this.offset = offset / 1.5
 
+		if (sleeping) {
+			sleepTime--
+			if(energy<100)energy++
+			if(hungry<80)hungry++
+			if (sleepTime < 0) {
+				sleeping = false
+				energy = 100
+			}
+			return
+		}
+
 		// !fore is hiding! Go click on him
 		if (!fore) {
 			//wait for click
@@ -49,8 +62,9 @@ class Nisse {
 		if (recharge <= 0 && energy > 0) {
 			recharge = 200
 			move = system.randInt(5, 45)
-			energy -= (int)(move/3)
-			if(energy < 0) energy = 0
+			energy -= (int) (move / 3)
+			if (energy < 0) energy = 0
+			hungry -= (int) (energy / 2)
 		} else {
 			recharge--
 		}
@@ -70,6 +84,10 @@ class Nisse {
 		}
 	}
 
+	def getRelativeX(){
+		x+offset
+	}
+
 	def updateAnim() {
 		animSpeed--
 		if (animSpeed <= 0) {
@@ -80,46 +98,60 @@ class Nisse {
 	}
 
 	def render(graphics) {
+		if (sleeping) {
+			graphics.drawString(1, "Zzzz"+('.'*(sleepTime%3)), x+offset, y)
+			graphics.sprite(defaultSprite, x + offset, y + 10, 2, 90)
+			return
+		}
 		if (move > 0) graphics.sprite(dir == 0 ? walkRight[animIndex] : walkLeft[animIndex], x + offset, y, 2)
 		//Still
 		else graphics.sprite(defaultSprite, x + offset, y, 2)
 	}
 
 	// If Nisse eats, spend 10 energy and reduce 15 hunger points.
-	def tryFeed(){
-		if(hungry > 50 && energy > 25){
+	def tryFeed() {
+		if (sleeping) return
+		if (hungry > 50 && energy > 25) {
 			energy -= 10
 			hungry -= 15
 		}
 	}
 
 	// Playing makes Nisse hungry by 10 points and costs 25 energy.
-	def tryPlay(){
-		if(hungry < 20 && energy > 40){
+	def tryPlay() {
+		if (sleeping) return
+		if (hungry < 20 && energy > 40) {
 			energy -= 25
 			hungry += 10
 		}
 	}
 
 	// Check on how Nisse is doing
-	def inquire(){
+	def inquire() {
 		answer = 100
-		if(energy < 10) {
+		if (sleeping) {
+			mood = "Zzzz..."
+			return
+		}
+		if (energy < 10) {
 			mood = "I'm quite tired..."
 			return
 		}
-		if(hungry > 50){
+		if (hungry > 50) {
 			mood = "I could eat..."
 			return
 		}
-		if(bored > 50){
+		if (bored > 50) {
 			mood = "I'm kind of bored here..."
 			return
 		}
 		mood = ":)"
 	}
 
-	def trySleep(){
-
+	def trySleep() {
+		if (energy < 15) {
+			sleeping = true
+			sleepTime = (100 - energy) * 25
+		}
 	}
 }

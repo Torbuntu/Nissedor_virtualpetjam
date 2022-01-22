@@ -1,15 +1,12 @@
 class Nissedor extends leikr.Engine {
 
+	// Images
 	def background = "parallax-forest-back-trees.png"
 	def middleGround = "parallax-forest-middle-trees.png"
 	def foreground = "parallax-forest-front-trees.png"
 	def lights = "parallax-forest-lights.png"
-
 	def cursorUp = "cursor_pointer3D_shadow.png"
-
 	def hud = "hud.png"
-
-	def happiness = "happiness.png"
 
 	def action, debug = false
 
@@ -41,18 +38,21 @@ class Nissedor extends leikr.Engine {
 			if(checkIn([11, 26, 36, 50])){
 				nisse.tryFeed()
 			}
+			// Play
 			if(checkIn([28, 42, 36, 50])){
 				nisse.tryPlay()
 			}
+			// Inquire
 			if(checkIn([46, 60, 36, 50])){
 				nisse.inquire()
 			}
+			// Sleep
 			if(checkIn([62, 78, 36, 50])){
 				nisse.trySleep()
 			}
 
 			// Click Nisse
-			if (checkIn([nisse.x+8, nisse.x+22, nisse.y+10, nisse.y+32])) {
+			if (checkIn([nisse.getRelativeX()+8, nisse.getRelativeX()+22, nisse.y+10, nisse.y+32])) {
 				if (nisse.fore) {
 					hideCount = 10
 					nisse.fore = false
@@ -67,7 +67,6 @@ class Nissedor extends leikr.Engine {
 
 		if (mouseX() > 220 && mapOffset > -30) mapOffset--
 		if (mouseX() < 20 && mapOffset < 0) mapOffset++
-
 
 		// Update Nisse
 		nisse.update(mapOffset, getSystem())
@@ -122,7 +121,7 @@ class Nissedor extends leikr.Engine {
 	void renderHud() {
 		// render UI
 		drawTexture(hud, 0, 0)
-		fillRect(15, 4, 8, (nisse.energy/100) * 90, 11)
+		fillRect(15, 4, 8, (nisse.energy*90)/100, 11)
 		// BEGIN Cursor
 		drawTexture(cursorUp, mouseX(), mouseY(), 10, 12)
 
