@@ -7,6 +7,8 @@ class Nissedor extends leikr.Engine {
 	def lights = "parallax-forest-lights.png"
 	def cursorUp = "cursor_pointer3D_shadow.png"
 	def hud = "hud.png"
+	def title = "title.png"
+	def begin = false
 
 	def action, debug = false
 
@@ -18,6 +20,8 @@ class Nissedor extends leikr.Engine {
 	def hideCount = 0
 	def hideTimer = 10
 
+	def found = 0
+
 	Nisse nisse
 
 
@@ -27,6 +31,12 @@ class Nissedor extends leikr.Engine {
 
 	void update(float delta) {
 		action = key("Space")
+		if(!begin){
+			if(key("Space") || key("X") || key("Enter") || mouseClick()){
+				begin = true
+			}
+			return
+		}
 
 		// update click action
 		if (mouseClick()) {
@@ -40,7 +50,10 @@ class Nissedor extends leikr.Engine {
 			}
 			// Play
 			if(checkIn([28, 42, 36, 50])){
-				nisse.tryPlay()
+				if(nisse.tryPlay()){
+					hideCount = 10
+					nisse.hide(getSystem())
+				}
 			}
 			// Inquire
 			if(checkIn([46, 60, 36, 50])){
@@ -55,12 +68,12 @@ class Nissedor extends leikr.Engine {
 			if (checkIn([nisse.getRelativeX()+8, nisse.getRelativeX()+22, nisse.y+10, nisse.y+32])) {
 				if (nisse.fore) {
 					hideCount = 10
-					nisse.fore = false
-					nisse.x = randInt(15, 205)
+					nisse.hide(getSystem())
 				} else {
 					nisse.happy += 20
 					if (nisse.happy > 100) nisse.happy = 100
 					nisse.fore = true
+					found = 30
 				}
 			}
 		}
@@ -78,6 +91,13 @@ class Nissedor extends leikr.Engine {
 
 
 	void render() {
+
+		if(!begin){
+			drawTexture(background, mapOffset, 0)
+			drawTexture(lights, mapOffset, 0)
+			drawTexture(title, 0,0)
+			return
+		}
 
 		if (hideCount > 0) {
 			renderHud()
@@ -98,6 +118,11 @@ class Nissedor extends leikr.Engine {
 		drawTexture(foreground, mapOffset / 2, 0)
 		if (nisse.checkFore()) nisse.render(getGraphics())
 		// END background render
+
+		if(found > 0){
+			found--
+			drawString(1, "!!", nisse.getRelativeX()+10, nisse.y)
+		}
 
 		// BEGIN Nisse
 		//nisse.render(getGraphics())
@@ -121,13 +146,13 @@ class Nissedor extends leikr.Engine {
 	void renderHud() {
 		// render UI
 		drawTexture(hud, 0, 0)
-		fillRect(15, 4, 8, (nisse.energy*90)/100, 11)
+		fillRect(15, 4, 8, (nisse.energy), 11)
 		// BEGIN Cursor
 		drawTexture(cursorUp, mouseX(), mouseY(), 10, 12)
 
 		if(nisse.answer > 0){
 			nisse.answer--
-			drawString(1, nisse.mood, nisse.x, nisse.y)
+			drawString(1, nisse.mood, nisse.getRelativeX(), nisse.y)
 		}
 
 		// Click action
@@ -172,17 +197,7 @@ class Nissedor extends leikr.Engine {
 // TODO
 /*
 
-	
-	Actions:
-	- Offer food to Nisse (improves mood if accepted) not hungry? Try playing a game.
-	- Play games with Nisse (hide and seek. Catch (Nisse throws something breakable up, you catch before it lands)
-	
-	Goals?:
-	- Nisse stays happy and doesn't kill/break stuff
-	- Nisse grows up and eventually enters Nissedor when fully satisfied and Nissedor appears
-
-
-
+Add some music and sfx
 
 */
 

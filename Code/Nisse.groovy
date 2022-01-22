@@ -3,7 +3,7 @@
  */
 
 class Nisse {
-	def x, y, offset
+	def x, y, offset = 0
 	// Default standing position.
 	def defaultSprite = 7
 	def fore = true
@@ -26,6 +26,10 @@ class Nisse {
 	def walkRight = [3, 4, 5]
 	def walkLeft = [9, 10, 11]
 
+	def energyLoss = 0
+
+	def generalWear = 20
+
 
 	// Look to see if the Nisse is in the foreground or background
 	boolean checkFore() {
@@ -42,13 +46,37 @@ class Nisse {
 		if (fore) this.offset = offset / 2
 		else this.offset = offset / 1.5
 
+		if(energyLoss > 0){
+			energy--
+			if (energy < 0) {
+				energyLoss = 0
+				energy = 0
+			}
+			energyLoss--
+		}
+
+		if(generalWear > 0){
+			generalWear--
+			if(generalWear <= 0){
+				generalWear = 250
+				hungry += 5
+				bored += 5
+				if(bored == 50){
+					mood = "Want to play hide and seek?"
+					answer = 100
+				}
+				energyLoss += 2
+			}
+
+		}
+
 		if (sleeping) {
 			sleepTime--
 			if(energy<100)energy++
 			if(hungry<80)hungry++
 			if (sleepTime < 0) {
 				sleeping = false
-				energy = 100
+				energyLoss = -100
 			}
 			return
 		}
@@ -62,8 +90,7 @@ class Nisse {
 		if (recharge <= 0 && energy > 0) {
 			recharge = 200
 			move = system.randInt(5, 45)
-			energy -= (int) (move / 3)
-			if (energy < 0) energy = 0
+			energyLoss += (int) (move / 3)
 			hungry -= (int) (energy / 2)
 		} else {
 			recharge--
@@ -103,27 +130,35 @@ class Nisse {
 			graphics.sprite(defaultSprite, x + offset, y + 10, 2, 90)
 			return
 		}
-		if (move > 0) graphics.sprite(dir == 0 ? walkRight[animIndex] : walkLeft[animIndex], x + offset, y, 2)
+		if (move > 0) graphics.sprite(dir == 0 ? walkRight[animIndex] : walkLeft[animIndex], (x + offset), y, 2)
 		//Still
-		else graphics.sprite(defaultSprite, x + offset, y, 2)
+		else graphics.sprite(defaultSprite, (x + offset), y, 2)
 	}
 
 	// If Nisse eats, spend 10 energy and reduce 15 hunger points.
 	def tryFeed() {
 		if (sleeping) return
 		if (hungry > 50 && energy > 25) {
-			energy -= 10
-			hungry -= 15
+			energyLoss += 10
+			hungry -= 50
 		}
 	}
 
 	// Playing makes Nisse hungry by 10 points and costs 25 energy.
 	def tryPlay() {
-		if (sleeping) return
-		if (hungry < 20 && energy > 40) {
-			energy -= 25
+		if (sleeping) return false
+		if (hungry < 20 && energy > 30) {
+			energyLoss += 25
 			hungry += 10
+			bored = 0
+			return true
 		}
+		return false
+	}
+
+	def hide(s){
+		fore = false
+		x = s.randInt(15, 205)
 	}
 
 	// Check on how Nisse is doing
@@ -151,7 +186,7 @@ class Nisse {
 	def trySleep() {
 		if (energy < 15) {
 			sleeping = true
-			sleepTime = (100 - energy) * 25
+			sleepTime = (100 - energy)
 		}
 	}
 }
