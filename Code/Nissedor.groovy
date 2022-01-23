@@ -27,6 +27,12 @@ class Nissedor extends leikr.Engine {
 
 	void create() {
 		nisse = new Nisse()
+		playMusic("story time.ogg", true)
+	}
+
+	void onResume(){
+		playMusic("story time.ogg", true)
+		playMusic("Forest_Ambience.mp3", true)
 	}
 
 	void update(float delta) {
@@ -34,6 +40,7 @@ class Nissedor extends leikr.Engine {
 		if(!begin){
 			if(key("Space") || key("X") || key("Enter") || mouseClick()){
 				begin = true
+				playMusic("Forest_Ambience.mp3", true)
 			}
 			return
 		}
@@ -46,13 +53,19 @@ class Nissedor extends leikr.Engine {
 
 			// Feed
 			if(checkIn([11, 26, 36, 50])){
-				nisse.tryFeed()
+				if(nisse.tryFeed()){
+					playSound("sfx100v2_misc_09.ogg")
+				}else{
+					playSound("negative_2.wav")
+				}
 			}
 			// Play
 			if(checkIn([28, 42, 36, 50])){
 				if(nisse.tryPlay()){
 					hideCount = 10
 					nisse.hide(getSystem())
+				}else{
+					playSound("negative_2.wav")
 				}
 			}
 			// Inquire
@@ -70,6 +83,7 @@ class Nissedor extends leikr.Engine {
 					hideCount = 10
 					nisse.hide(getSystem())
 				} else {
+					playSound("positive.wav")
 					nisse.happy += 20
 					if (nisse.happy > 100) nisse.happy = 100
 					nisse.fore = true
@@ -141,6 +155,7 @@ class Nissedor extends leikr.Engine {
 		drawString(1, "map offset: $mapOffset", 0, 0)
 		drawString(1, "Fore: ${nisse.fore}", 0, 10)
 		drawCircle(10, mouseX(), mouseY(), 3)
+		drawString(1, "${nisse.hungry}", 0, 20)
 	}
 
 	void renderHud() {

@@ -59,8 +59,8 @@ class Nisse {
 			generalWear--
 			if(generalWear <= 0){
 				generalWear = 250
-				hungry += 5
-				bored += 5
+				hungry += 15
+				bored += 15
 				if(bored == 50){
 					mood = "Want to play hide and seek?"
 					answer = 100
@@ -91,7 +91,7 @@ class Nisse {
 			recharge = 200
 			move = system.randInt(5, 45)
 			energyLoss += (int) (move / 3)
-			hungry -= (int) (energy / 2)
+			hungry += (int) (energy / 2)
 		} else {
 			recharge--
 		}
@@ -137,11 +137,14 @@ class Nisse {
 
 	// If Nisse eats, spend 10 energy and reduce 15 hunger points.
 	def tryFeed() {
-		if (sleeping) return
-		if (hungry > 50 && energy > 25) {
+		if (sleeping) return false
+		if (hungry > 10 && energy > 25) {
 			energyLoss += 10
 			hungry -= 50
+			if(hungry < 0)hungry = 0
+			return true
 		}
+		return false
 	}
 
 	// Playing makes Nisse hungry by 10 points and costs 25 energy.
